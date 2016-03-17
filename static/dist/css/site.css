@@ -12044,3 +12044,13 @@ label.required:after {
 #mapcontainer > svg {
   position: relative !important;
 }
+.temp-code {
+  width: 100%;
+  height: 15rem;
+  border: 1px solid #EEE;
+  margin: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}
