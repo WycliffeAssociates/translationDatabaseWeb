@@ -68,7 +68,7 @@
                     </span>
                     <div style="display: flex;">
                         <h1 class="panel-title">
-                            <a href="{% url "language_detail" language.pk %}">{{ language.ang|default:language.ln }}</a> <span class="badge">{{ language.code }}</span>
+                            <a onclick="event.stopPropagation()" href="{% url "language_detail" language.pk %}">{{ language.ang|default:language.ln }}</a> <span class="badge">{{ language.code }}</span>
                             {% for variant in language.variant_codes %}
                                 <span class="badge">{{ variant }}</span>
                             {% endfor %}
