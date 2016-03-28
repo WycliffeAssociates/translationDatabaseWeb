@@ -181,5 +181,5 @@ class LanguageTestCase(TestCase):
     def test_documents_ordered(self):
         tmp = self.lang.documents_ordered
         self.assertEqual(len(tmp), 2)
-        self.assertEqual(tmp[0].pk, self.doc_one.pk)
-        self.assertEqual(tmp[1].pk, self.doc_two.pk)
+        self.assertEqual(tmp[0].pk, self.progress_one.pk)
+        self.assertEqual(tmp[1].pk, self.progress_two.pk)
