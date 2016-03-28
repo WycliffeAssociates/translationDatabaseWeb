@@ -138,15 +138,15 @@ class LanguageIntegrationTests(TestCase):
 class LanguageTestCase(TestCase):
 
     def setUp(self):
-        self.lang = Language.objects.create(code="tl", name="Test Language", gateway_flag= True)
+        self.lang = Language.objects.create(code="tl", name="Test Language", gateway_flag=True)
         self.phase_one = Phase.objects.create(number=1)
         self.phase_two = Phase.objects.create(number=2)
-        self.cat_one = DocumentCategory.objects.create(name = "Category One", phase= self.phase_one)
-        self.cat_two = DocumentCategory.objects.create(name = "Category Two", phase= self.phase_two)
+        self.cat_one = DocumentCategory.objects.create(name="Category One", phase=self.phase_one)
+        self.cat_two = DocumentCategory.objects.create(name="Category Two", phase=self.phase_two)
         self.doc_one = Document.objects.create(name="Document One", code="one", category=self.cat_one)
         self.doc_two = Document.objects.create(name="Document Two", code="two", category=self.cat_two)
-        self.progress_one = Progress.objects.create(language= self.lang, type= self.doc_one)
-        self.progress_two = Progress.objects.create(language= self.lang, type= self.doc_two)
+        self.progress_one = Progress.objects.create(language=self.lang, type=self.doc_one)
+        self.progress_two = Progress.objects.create(language=self.lang, type=self.doc_two)
         self.lang.progress_set.add(self.progress_one)
         self.lang.progress_set.add(self.progress_two)
 
