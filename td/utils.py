@@ -12,6 +12,14 @@ from svglib.svglib import SvgRenderer
 from reportlab.graphics import renderPDF
 
 
+def fill_language_data(field, lang):
+    field.widget.attrs["data-lang-pk"] = lang.pk
+    field.widget.attrs["data-lang-ln"] = lang.ln
+    field.widget.attrs["data-lang-lc"] = lang.lc
+    field.widget.attrs["data-lang-lr"] = lang.lr
+    return field
+
+
 def str_to_bool(value, allow_null=False):
     if str(value).strip().lower() in ["yes", "true", "1", "y"]:
         return True

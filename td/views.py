@@ -288,15 +288,12 @@ def upload_gateway_flag_file(request):
         if form.is_valid():
             Language.objects.filter(gateway_flag=True).update(gateway_flag=False)
             Language.objects.filter(code__in=form.cleaned_data["languages"]).update(gateway_flag=True)
-            messages.add_message(request, messages.SUCCESS, "Gateway languages updated")
+            messages.add_message(request, messages.SUCCESS, "Gateway languages are updated succesfully")
             return redirect("gateway_flag_update")
     else:
         form = UploadGatewayForm(
             initial={
-                "languages": "\n".join([
-                    l.code.lower()
-                    for l in Language.objects.filter(gateway_flag=True).order_by("code")
-                ])
+                "languages": "\n".join([l.code for l in Language.objects.filter(gateway_flag=True).order_by("code")])
             }
         )
     return render(request, "resources/gateway_languages_update.html", {"form": form})

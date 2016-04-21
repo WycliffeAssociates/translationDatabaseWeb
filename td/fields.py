@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django.core.urlresolvers import reverse
 from django import forms
 
 
@@ -31,11 +32,11 @@ class BSDateField(forms.DateField):
 class LanguageCharField(forms.CharField):
     description = "Text field to search a language"
 
-    def __init__(self, data_source_url="", css_class="language-selector", *args, **kwargs):
+    def __init__(self, data_source_url="", css_class="", *args, **kwargs):
         kwargs["widget"] = forms.TextInput(
             attrs={
-                "class": css_class,
-                "data-source-url": data_source_url
+                "class": css_class or "language-selector",
+                "data-source-url": data_source_url or reverse("names_autocomplete")
             }
         )
         super(LanguageCharField, self).__init__(*args, **kwargs)
