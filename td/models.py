@@ -1,5 +1,7 @@
-from django.contrib.contenttypes.models import ContentType
+from __future__ import absolute_import
+
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
@@ -73,20 +75,9 @@ class TempLanguage(models.Model):
 
     @property
     def questions_and_answers(self):
-        answers = {}
-        if self.answers is not None:
-            for a in self.answers:
-                answers[str(a["question_id"])] = a["text"]
-        questions = []
-        # Build a list of questions
-        for q in self.questionnaire.questions:
-            if str(q["id"]) in answers:
-                question_answer = answers[str(q["id"])]
-            else:
-                question_answer = ""
-            questions.append({"id": q["id"], "question": q["text"], "answer": question_answer})
-        # Now match in the answers
-        return questions
+        answers = {} if self.answers is None else dict(map(lambda x: (str(x["question_id"]), x["text"]), self.answers))
+        return [{"id": q.get("id"), "question": q.get("text"), "answer": answers.get(str(q["id"]), "")}
+                for q in self.questionnaire.questions]
 
     @classmethod
     def pending(cls):
@@ -102,9 +93,10 @@ class TempLanguage(models.Model):
 
     @classmethod
     def lang_assigned_data(cls):
-        return [{"pk": x.pk, "lc": x.code, "ln": x.name, "ang": x.lang_assigned.ang, "alt": x.lang_assigned.alt_name_all,
-                 "cc": [x.country.code] if x.country is not None else [], "lr": x.lang_assigned.lr,
-                 "gw": x.lang_assigned.gateway_flag, "ld": x.get_direction_display()} for x in cls.objects.all()]
+        return [{"pk": x.pk, "lc": x.code, "ln": x.name, "ang": x.lang_assigned.ang,
+                 "alt": x.lang_assigned.alt_name_all, "cc": [x.country.code] if x.country is not None else [],
+                 "lr": x.lang_assigned.lr, "gw": x.lang_assigned.gateway_flag, "ld": x.get_direction_display()}
+                for x in cls.objects.all()]
 
     @classmethod
     def lang_assigned_map(cls):
@@ -209,7 +201,6 @@ class Country(models.Model):
     population = models.IntegerField(null=True, blank=True)
     primary_networks = models.ManyToManyField(Network, blank=True, db_table='uw_country_primary_networks')
     extra_data = JSONField(default=dict)
-
     tracker = FieldTracker()
 
     class Meta:
@@ -282,11 +273,6 @@ class LanguageAltName(models.Model):
 
 @python_2_unicode_compatible
 class Language(models.Model):
-    DIRECTION_CHOICES = (
-        ("l", "ltr"),
-        ("r", "rtl")
-    )
-
     code = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=100, blank=True)
     anglicized_name = models.CharField(max_length=100, blank=True)
@@ -318,15 +304,11 @@ class Language(models.Model):
 
     @property
     def cc(self):
-        if self.country:
-            return self.country.code.encode("utf-8")
-        return ""
+        return self.country.code.encode("utf-8") if self.country is not None else ""
 
     @property
     def cc_all(self):
-        pks = [int(pk)
-               for pk in self.attributes.filter(attribute="country_id")
-                                        .values_list("value", flat=True)]
+        pks = [int(pk) for pk in self.attributes.filter(attribute="country_id").values_list("value", flat=True)]
         countries = Country.objects.filter(pk__in=pks)
         return [c.code.encode("utf-8") for c in countries]
 
