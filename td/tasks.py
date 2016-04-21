@@ -6,7 +6,7 @@ from django.db import connection
 from celery import task
 from pinax.eventlog.models import log
 
-from td.imports.models import (
+from .imports.models import (
     EthnologueLanguageCode,
     EthnologueCountryCode,
     IMBPeopleGroup,
@@ -14,10 +14,17 @@ from td.imports.models import (
     WikipediaISOCountry,
     WikipediaISOLanguage
 )
-from td.resources.models import Title, Resource, Media
-
+from .resources.models import Title, Resource, Media
 from .models import AdditionalLanguage, Country, Language, Region, JSONData
 from .signals import languages_integrated
+
+
+def _get_or_create_object(model, slug, name):
+    o, c = model.objects.get_or_create(slug=slug)
+    if c:
+        o.name = name
+        o.save()
+    return o
 
 
 @task()
@@ -108,14 +115,6 @@ left join imports_ethnologuecountrycode cc on lc.country_code = cc.code
                 language.save()
     languages_integrated.send(sender=Language)
     log(user=None, action="INTEGRATED_SOURCE_DATA", extra={})
-
-
-def _get_or_create_object(model, slug, name):
-    o, c = model.objects.get_or_create(slug=slug)
-    if c:
-        o.name = name
-        o.save()
-    return o
 
 
 @task()
