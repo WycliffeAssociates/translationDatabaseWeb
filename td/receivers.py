@@ -1,18 +1,17 @@
+from __future__ import absolute_import
+
 from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
 
-from account.signals import password_changed
-from account.signals import user_sign_up_attempt, user_signed_up
-from account.signals import user_login_attempt, user_logged_in
-
+from account.signals import password_changed, user_sign_up_attempt, user_signed_up, user_logged_in, user_login_attempt
 from pinax.eventlog.models import log
 
+from .resources.tasks import notify_templanguage_created
 from .models import Country, Language, LanguageAltName, AdditionalLanguage, TempLanguage
 from .tasks import reset_langnames_cache, update_alt_names
 from .signals import languages_integrated
-from td.resources.tasks import notify_templanguage_created
 
 
 @receiver(post_save, sender=TempLanguage)
@@ -89,20 +88,12 @@ def handle_languages_integrated(sender, **kwargs):
 
 @receiver(user_logged_in)
 def handle_user_logged_in(sender, **kwargs):
-    log(
-        user=kwargs.get("user"),
-        action="USER_LOGGED_IN",
-        extra={}
-    )
+    log(user=kwargs.get("user"), action="USER_LOGGED_IN", extra={})
 
 
 @receiver(password_changed)
 def handle_password_changed(sender, **kwargs):
-    log(
-        user=kwargs.get("user"),
-        action="PASSWORD_CHANGED",
-        extra={}
-    )
+    log(user=kwargs.get("user"), action="PASSWORD_CHANGED", extra={})
 
 
 @receiver(user_login_attempt)
