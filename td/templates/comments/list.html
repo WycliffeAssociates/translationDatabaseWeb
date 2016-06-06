@@ -1,0 +1,18 @@
+{% load comments %}
+
+<div class="comment-list-container">
+  <div class="comment-list-header">
+    <h3>Comments <span>({{ comment_list|length }})</span></h3>
+  </div>
+  <ul class="comment-list">
+    {% for comment in comment_list|dictsortreversed:"submit_date" %}
+      <li>
+        {{ comment.comment|safe|linebreaks }}
+        <p class="comment-list-info">{{ comment.user_name }}, {{ comment.submit_date }}{{ comment.source }}</p>
+        {% if not forloop.last %}
+          <hr />
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
