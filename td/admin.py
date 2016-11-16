@@ -42,7 +42,18 @@ class NetworkAdmin(EntryTrackingAdmin):
     list_display = ["name"]
 
 
-class CountryAdmin(EntryTrackingAdmin):
+class CountryResource(resources.ModelResource):
+
+    class Meta:
+        model = Country
+        skip_unchanged = True
+        report_skipped = True
+        fields = ["id", "name", "code", "alpha_3_code", "region", "wa_region", "population", "primary_networks",
+                  "extra_data", ]
+
+
+class CountryAdmin(EntryTrackingAdmin, ImportExportModelAdmin):
+    resource_class = CountryResource
     list_display = ["code", "name", "region", "wa_region", "population"]
     search_fields = ["code", "name", "region__name", "wa_region__name"]
 
@@ -117,6 +128,20 @@ class RegionAdmin(EntryTrackingAdmin):
     prepopulated_fields = {"slug": ["name"]}
 
 
+class WARegionResource(resources.ModelResource):
+    class Meta:
+        model = WARegion
+        skip_unchanged = True
+        report_skipped = True
+        fields = ["id", "name", "slug", ]
+
+
+class WARegionAdmin(EntryTrackingAdmin, ImportExportModelAdmin):
+    resource_class = WARegionResource
+    list_display = ["name", "slug", ]
+    search_fields = ["name", "slug", ]
+
+
 class LanguageEAVAdmin(EntryTrackingAdmin):
     list_display = ["entity", "attribute", "value", "source_ct", "source_id"]
     list_filter = ["attribute", "source_ct", ]
@@ -133,7 +158,7 @@ admin.site.register(Country, CountryAdmin)
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(LanguageAltName, LanguageAltNameAdmin)
 admin.site.register(Region, RegionAdmin)
-admin.site.register(WARegion)
+admin.site.register(WARegion, WARegionAdmin)
 admin.site.register(JSONData)
 admin.site.register(CountryEAV, CountryEAVAdmin)
 admin.site.register(LanguageEAV, LanguageEAVAdmin)

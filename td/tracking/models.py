@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 from model_utils import FieldTracker
 
 from td.commenting.models import CommentableModel
@@ -51,6 +52,10 @@ class Charter(CommentableModel):
         return reverse("language_detail", kwargs={"pk": self.language_id})
 
     @property
+    def name(self):
+        return self.language.code
+
+    @property
     def lang_id(self):
         return self.language.id
 
@@ -90,6 +95,24 @@ class Charter(CommentableModel):
             dict(pk=x.language.pk, lc=x.language.lc, ln=x.language.ln, cc=[x.language.cc], lr=x.language.lr)
             for x in cls.objects.all()
         ]
+
+    @classmethod
+    def export_data(cls):
+        return [{
+            "name": x.name,
+            "language_code": x.language and x.language.code,
+            "language_name": x.language and x.language.name,
+            "new_start": x.new_start,
+            "countries": [{"name": c.name, "code": c.code} for c in x.countries.all()],
+            "start_date": str(x.start_date),
+            "end_date": str(x.end_date),
+            "accounting_number": x.number,
+            "lead_dept_id": x.lead_dept_id,
+            "lead_dept_name": x.lead_dept,
+            "contact_person": x.contact_person,
+            "partner_id": x.partner_id,
+            "partner_name": x.partner,
+        } for x in cls.objects.all()]
 
 
 # ----------- #
@@ -149,6 +172,37 @@ class Event(CommentableModel):
         charter = Charter.objects.get(id=self.charter_id)
         return "-".join([charter.language.tag_slug, "proj", "e" + str(self.number)])
 
+    @property
+    def name(self):
+        return " ".join([self.charter.name, str(self.number)])
+
+    @classmethod
+    def export_data(cls):
+        return [{
+            "name": x.name,
+            "charter_partner": x.charter and x.charter.partner and x.charter.partner.name,
+            "charter": x.charter and {"id": x.charter.id, "name": x.charter.name},
+            "number": x.number,
+            "location": x.location,
+            "start_date": str(x.start_date),
+            "end_date": str(x.end_date),
+            "current_check_level": x.current_check_level,
+            "target_check_level": x.target_check_level,
+            "contact_person": x.contact_person,
+            "partner": {"id": x.partner.id, "name": x.partner.name} if x.partner else {},
+            "lead_dept": {"id": x.lead_dept.id, "name": x.lead_dept.name} if x.lead_dept else {},
+            "support_depts": [{"id": d.id, "name": d.name} for d in x.departments.all()],
+            "translators": [{"id": t.id, "name": t.name, "docs_signed": t.docs_signed} for t in x.translators.all()],
+            "hardware": [{"id": h.id, "name": h.name} for h in x.hardware.all()],
+            "software": [{"id": s.id, "name": s.name} for s in x.software.all()],
+            "materials": [{"id": m.id, "name": m.name, "licensed": m.licensed} for m in x.materials.all()],
+            "translation_methods": [{"id": tm.id, "name": tm.name} for tm in x.translation_methods.all()],
+            "output_target": [{"id": ot.id, "name": ot.name} for ot in x.output_target.all()],
+            "publications": [{"id": p.id, "name": p.name} for p in x.publication.all()],
+            "facilitators": [{"id": f.id, "name": f.name, "is_lead": f.is_lead, "speaks_gl": f.speaks_gl} for f in x.facilitators.all()],
+            "comment": x.comment,
+        } for x in Event.objects.all()]
+
 
 # ------------------------ #
 #    TRANSLATIONSMETHOD    #
@@ -194,19 +248,26 @@ class Material(models.Model):
     def __unicode__(self):
         return self.name
 
+    @classmethod
+    def export_data(cls):
+        return [{"name": m.name, "licensed": m.licensed} for m in cls.objects.all()]
+
 
 # ---------------- #
 #    TRANSLATOR    #
 # ---------------- #
+@python_2_unicode_compatible
 class Translator(models.Model):
 
     name = models.CharField(max_length=200)
-    # sof = models.BooleanField(default=False)
-    # tg = models.BooleanField(default=False)
     docs_signed = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
+
+    @classmethod
+    def export_data(cls):
+        return [{"name": t.name, "docs_signed": t.docs_signed} for t in cls.objects.all()]
 
 
 # ----------------- #
@@ -221,15 +282,24 @@ class Facilitator(models.Model):
     def __unicode__(self):
         return self.name
 
+    @classmethod
+    def export_data(cls):
+        return[{
+            "name": f.name,
+            "is_lead": f.is_lead,
+            "speaks_gl": f.speaks_gl,
+        } for f in cls.objects.all()]
+
 
 # ---------------- #
 #    DEPARTMENT    #
 # ---------------- #
+@python_2_unicode_compatible
 class Department(models.Model):
 
     name = models.CharField(max_length=200)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 

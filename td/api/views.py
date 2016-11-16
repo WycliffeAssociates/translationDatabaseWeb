@@ -5,9 +5,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
-from td.models import TempLanguage, Country
+from td.models import TempLanguage, Country, JSONData, Language
 from td.resources.models import Questionnaire
-
+from td.views import names_json_export
 
 logger = logging.getLogger(__name__)
 
@@ -107,3 +107,7 @@ def lang_assignment_json(request):
 
 def lang_assignment_changed_json(request):
     return JsonResponse(TempLanguage.lang_assigned_changed_map(), safe=False)
+
+
+def countries_json(request):
+    return JsonResponse(Country.export_data(), safe=False)

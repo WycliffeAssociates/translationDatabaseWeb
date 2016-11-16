@@ -19,7 +19,7 @@ from .models import (
 from td.models import Language
 
 
-class CharterResource(resources.ModelResource):
+class CharterResource(resources.Resource):
     language = fields.Field(column_name="language_code", attribute="language",
                             widget=widgets.ForeignKeyWidget(Language, "code"))
     lead_dept = fields.Field(column_name="lead_dept_name", attribute="lead_dept",
@@ -34,8 +34,10 @@ class CharterResource(resources.ModelResource):
 
     class Meta:
         model = Charter
-        fields = ("id", "language", "start_date", "end_date", "lead_dept", "contact_person", "new_start", "partner",
-                  "created_by")
+        fields = ("id", "language", "language__name", "language__anglicized_name", "language__alt_names",
+                  "language__country__name", "language__direction", "language__gateway_flag",
+                  "language__wa_region__name", "start_date", "end_date", "lead_dept", "contact_person", "new_start",
+                  "partner", "created_by", "created_at", "modified_by", "modified_at")
 
 
 class EventResource(resources.ModelResource):

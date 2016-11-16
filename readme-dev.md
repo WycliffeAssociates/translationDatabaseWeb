@@ -76,7 +76,7 @@ If you need more information on installing the cli, look here: http://eldarion-g
     create database td encoding 'UTF8';
     \q
 
-In `/etc/postgresql/9.3/main/pg_hba.conf` change 
+In `/etc/postgresql/9.3/main/pg_hba.conf` change (9.3 is your postgresql version. Change if needed) 
 
     local   all             all                                     peer
     host    all             all             127.0.0.1/32            peer
@@ -91,14 +91,16 @@ Now, restart the service: `sudo service postgresql restart`.
 
 Run this script to initialize the database with a dump from the production server:
 
-    ec run db --instance=primary -- pg_dump --no-owner --no-acl | ./manage.py dbshell
+    ec --instance=primary run db -- pg_dump --no-owner --no-acl | ./manage.py dbshell
 
-If you get timeout errors running the above command, this is an alternative that has worked:
+If you get timeout errors running the above command, one alternative is to split the process:
 
-    ec run db --instance=primary -- pg_dump --no-owner --no-acl -T imports_* > dump.sql
-    ec run db --instance=primary -- pg_dump --no-owner --no-acl -t imports_* > imports.sql
-    ./manage.py dbshell < dump.sql
-    ./manage.py dbshell < imports.sql
+    ec run db --instance=primary -- pg_dump --no-owner --no-acl -T imports_* > dump1.sql
+    ec run db --instance=primary -- pg_dump --no-owner --no-acl -t imports_* > dump2.sql
+    ./manage.py dbshell < dump1.sql
+    ./manage.py dbshell < dump2.sql
+
+Run migration to make sure your database schema is up-to-date: `python manage.py migrate`
 
 
 ### Install Redis

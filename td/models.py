@@ -278,6 +278,22 @@ class Country(CommentableModel):
                     data[country.code]["gateways"]["n/a"].append(lang)
         return data
 
+    @classmethod
+    def export_data(cls):
+        return [{
+            "id": c.id,
+            "code": c.code,
+            "alpha_3_code": c.alpha_3_code,
+            "name": c.name,
+            "region_id": c.region.id if c.region else "",
+            "region_name": c.region.name if c.region else "",
+            "wa_region_id": c.wa_region.id if c.wa_region else "",
+            "wa_region_name": c.wa_region.name if c.wa_region else "",
+            "population": c.population,
+            "primary_networks": [{"id": n.id, "name": n.name} for n in c.primary_networks.all()],
+            "extra_data": c.extra_data,
+        } for c in cls.objects.all().prefetch_related("primary_networks").select_related("region", "wa_region")]
+
     def __str__(self):
         return self.name
 

@@ -84,24 +84,25 @@ def integrate_imports():
     """
     cursor = connection.cursor()
     cursor.execute("""
-select coalesce(nullif(x.part_1, ''), x.code) as code,
-       coalesce(nullif(nn1.native_name, ''), nullif(nn2.native_name, ''), x.ref_name) as name,
-       coalesce(nullif(nn1.language_name, ''), nn2.language_name, lc.name, '') as anglicized_name,
-       coalesce(cc.code, ''),
-       nullif(nn1.native_name, '') as nn1name,
-       nn1.id,
-       nullif(nn2.native_name, '') as nn2name,
-       nn2.id,
-       x.ref_name as xname,
-       x.id,
-       x.code as iso_639_3
-  from imports_sil_iso_639_3 x
-left join imports_ethnologuelanguagecode lc on x.code = lc.code
-left join imports_wikipediaisolanguage nn1 on x.part_1 = nn1.iso_639_1
-left join imports_wikipediaisolanguage nn2 on x.code = nn2.iso_639_3
-left join imports_ethnologuecountrycode cc on lc.country_code = cc.code
- where lc.status = %s or lc.status is NULL order by code;
-""", [EthnologueLanguageCode.STATUS_LIVING])
+        select coalesce(nullif(x.part_1, ''), x.code) as code,
+               coalesce(nullif(nn1.native_name, ''), nullif(nn2.native_name, ''), x.ref_name) as name,
+               coalesce(nullif(nn1.language_name, ''), nn2.language_name, lc.name, '') as anglicized_name,
+               coalesce(cc.code, ''),
+               nullif(nn1.native_name, '') as nn1name,
+               nn1.id,
+               nullif(nn2.native_name, '') as nn2name,
+               nn2.id,
+               x.ref_name as xname,
+               x.id,
+               x.code as iso_639_3
+        from imports_sil_iso_639_3 x
+          left join imports_ethnologuelanguagecode lc on x.code = lc.code
+          left join imports_wikipediaisolanguage nn1 on x.part_1 = nn1.iso_639_1
+          left join imports_wikipediaisolanguage nn2 on x.code = nn2.iso_639_3
+          left join imports_ethnologuecountrycode cc on lc.country_code = cc.code
+        where lc.status = %s or lc.status is NULL
+        order by code;
+    """, [EthnologueLanguageCode.STATUS_LIVING])
     rows = cursor.fetchall()
     rows.extend([
         (
